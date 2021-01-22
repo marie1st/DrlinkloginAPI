@@ -17,3 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('login', 'AuthController@login');
+Route::post('login_social', 'AuthController@loginSocial');
+Route::post('/register', 'AuthController@register');
+
+Route::post('/resend_confirmation_email/{user}', 'AuthController@resendConfirmationEmail');
+Route::get('/resend_confirmation_email/{user}', 'AuthController@resendConfirmationEmail');
+
+
+Route::post('/reset_password_email', 'AuthController@reset_password_email');

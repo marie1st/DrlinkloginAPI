@@ -16,3 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::get('/login', function () {
+    return redirect(env('DRLINK_HOST'));
+})->name('login');
+  
+Route::get('/email/verify/{id}', 'Api\AuthController@verify')->middleware(['signed'])->name('verification.verify');
