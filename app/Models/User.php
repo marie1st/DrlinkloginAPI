@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -39,4 +39,11 @@ class User extends Authenticatable
     protected $casts = [
         
     ];
+
+    public function run()
+    {
+    User::factory()
+            ->count(50)
+            ->create();
+    }
 }
