@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\;
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
 use App\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +15,7 @@ use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
+   
   public function resendConfirmationEmail(User $user) {
     if ($user->hasVerifiedEmail()) {
       return response()->json(["message" => "คุณได้ทำการยืนยันอีเมลแล้ว"], 400);
@@ -39,17 +41,30 @@ class AuthController extends Controller
 }
 
   public function login(Request $request) {
-    $credentials = $request->only('email', 'password');
-    if (Auth::attempt($credentials)) {
-      return response()->json([
-        'user_id' => Auth::id(),
-        'token' => Auth::user()->api_token
-      ]);
+    try{
+      $credentials = $request->only('email', 'password');
+      if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+        $token = $user->createToken('app')->accessToken;
+        return response()->json([
+          'message' => 'success',
+          'token' => $token,
+          'user' => $user
+        ]);
+      }
+    }catch(\Exception $exception) {
+        return response([
+          'message' => $exception-getMessage()
+        ], 400);
     }
-
     return response()->json([
       'message' => 'อีเมล หรือ รหัสผ่าน ไม่ถูกต้อง'
     ], 403);
+  }
+
+  public function user()
+  {
+    return Auth::user();
   }
 
   public function loginSocial(Request $request) {
@@ -90,24 +105,14 @@ class AuthController extends Controller
     ]);
   }
 
-  public function register(Request $request) {
-    $user = new User([
+  public function register(RegisterRequest $request) {
+    $user = User::create([
       'username' => $request['username'],
       'email' => $request['email'],
       'password' => Hash::make($request['password']),
-      'api_token' => Str::random(32),
-      'profile' => [
-        'name' => $request['username'],
-        'avatar' => '/img/graphics/default_avatar.jpg'
-      ]
     ]);
 
-    $user->api_token = Str::random(32);
-
     $user->save();
-
-    event(new Registered($user));
-    $user->sendEmailVerificationNotification();
 
     return response()->json($user);
   }
@@ -116,14 +121,6 @@ class AuthController extends Controller
     return $request->user();
   }
 
-  public function verify_otp(Request $request) {
-    $user = User::find($request['user_id']);
-
-    return response()->json([
-      'user_id' => $user->id,
-      'token' => $user->api_token
-    ]);
-  }
 
   public function reset_password_email(Request $request) {
     $user = User::where([
@@ -175,5 +172,5 @@ class AuthController extends Controller
     $user->save();
 
     return $user;
-  }
+}
 }
