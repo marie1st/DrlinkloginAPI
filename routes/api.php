@@ -20,7 +20,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('/login', 'AuthController@login');
 Route::get('/user', 'AuthController@user')->middleware('auth:api');
-Route::post('login_social', 'AuthController@loginSocial');
 Route::post('/register', 'AuthController@register');
 
 Route::post('/resend_confirmation_email/{user}', 'AuthController@resendConfirmationEmail');
