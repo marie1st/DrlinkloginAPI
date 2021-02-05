@@ -27,3 +27,4 @@ Route::get('/resend_confirmation_email/{user}', 'AuthController@resendConfirmati
 
 
 Route::post('/reset_password_email', 'AuthController@reset_password_email');
+
